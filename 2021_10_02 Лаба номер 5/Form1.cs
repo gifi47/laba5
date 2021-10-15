@@ -37,10 +37,12 @@ namespace _2021_10_02_Лаба_номер_5
         DateTime lastCheck;
         long frameCount;
 
+        float[,] zBuffer;
+
         private void Render()
         {
             Vector3[] pVertices = new Vector3[vertices.Length];
-            int[,] zBuffer = new int[planeWidth, planeHeight];
+            zBuffer = new float[planeWidth, planeHeight];
             for (int i = 0; i < vertices.Length; i++)
             {
                 pVertices[i] = Bias * (vertices[i] - Center) + Center + Translation;
@@ -48,6 +50,7 @@ namespace _2021_10_02_Лаба_номер_5
                 pVertices[i] = new Vector3(pVertices[i].x * planeZ / vZ * scale, pVertices[i].y * planeZ / vZ * scale, vZ);
                 pVertices[i].x += planeWidth / 2;
                 pVertices[i].y = (-pVertices[i].y) + planeHeight / 2;
+                //Console.WriteLine($"vert {i} {pVertices[i].x}x {pVertices[i].y}y {pVertices[i].z}z");
             }
             
             unsafe
@@ -100,13 +103,13 @@ namespace _2021_10_02_Лаба_номер_5
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\makaka.obj", true);
-            //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\monke.obj", true);
+            //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\makaka.obj", true);
+            //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\ahri.obj", true);
             //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\physic_final_ver.obj", true);
             //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\pistol.obj", true);
             planeZ = 1;
-            //Translation = new Vector3(0, -0.5f, 4);
-            Translation = new Vector3(0, 0, 2);
+            Translation = new Vector3(0, 0, 0);
+            //Translation = new Vector3(0, -2, 4);
             angle_tick = 0.01f;
             ang = (float)Math.PI / 2;
             planeHeight = pictureBox1.Height;
@@ -136,10 +139,10 @@ namespace _2021_10_02_Лаба_номер_5
             //indeces = new int[] { 7, 3, 2, 2, 6, 7, 0, 4, 5, 5, 1, 0, 7, 4, 0, 0, 3, 7, 2, 1, 5, 5, 6, 2 };
             //indeces = new int[] { 7, 4, 0, 0, 3, 7, 2, 1, 5, 5, 6, 2 };
 
-            Center = new Vector3(monke.right - (monke.right - monke.left) / 2, monke.top - (monke.top - monke.bottom) / 2, monke.front - (monke.front - monke.back) / 2);
+            /*Center = new Vector3(monke.right - (monke.right - monke.left) / 2, monke.top - (monke.top - monke.bottom) / 2, monke.front - (monke.front - monke.back) / 2);
             Console.WriteLine($"Center: ({ Center.x }, { Center.y }, { Center.z })");
             vertices = monke.vertices;
-            indeces = monke.indeces;
+            indeces = monke.indeces;*/
             map = new Bitmap(planeWidth, planeWidth);
             pictureBox1.Image = map;
             lastCheck = DateTime.Now;
@@ -320,71 +323,126 @@ namespace _2021_10_02_Лаба_номер_5
                 mid = temp;
             }
         }
-
-        private unsafe void FillTriangle(byte* scan0, int stride, int bitsPerPixel, PointF p1, PointF p2, PointF p3)
+        private void SortPoints(ref Vector3 left, ref Vector3 mid, ref Vector3 right)
         {
-            PointF left = p1;
-            PointF mid = p2;
-            PointF right = p3;
+            Vector3 temp;
+            if (left.x > mid.x)
+            {
+                temp = left;
+                left = mid;
+                mid = temp;
+            }
+            if (right.x < mid.x)
+            {
+                temp = right;
+                right = mid;
+                mid = temp;
+            }
+            if (left.x > mid.x)
+            {
+                temp = left;
+                left = mid;
+                mid = temp;
+            }
+        }
+
+        private unsafe void FillTriangle(byte* scan0, int stride, int bitsPerPixel, Vector3 p1, Vector3 p2, Vector3 p3, byte r = 20, byte g = 20, byte b = 200)
+        {
+            Vector3 left = p1;
+            Vector3 mid = p2;
+            Vector3 right = p3;
             SortPoints(ref left, ref mid, ref right);
 
-            int leftXI = (int)Math.Round(left.X);
-            int midXI = (int)Math.Round(mid.X);
-            int rightXI = (int)Math.Round(right.X);
-            float dUpLtY = (Math.Abs(mid.X - left.X) >= 1 ? (mid.Y - left.Y) / (mid.X - left.X) : 0);
-            float dUpRtY = (Math.Abs(mid.X - right.X) >= 1 ? (mid.Y - right.Y) / (mid.X - right.X) : 0);
-            float dDownY = (Math.Abs(right.X - left.X) >= 1 ? (right.Y - left.Y) / (right.X - left.X) : 0);
+            int leftXI = (int)Math.Round(left.x);
+            int midXI = (int)Math.Round(mid.x);
+            int rightXI = (int)Math.Round(right.x);
 
-            float upY = left.Y;
-            float downY = left.Y;
-            float downMdY = left.Y + dDownY * (mid.X - left.X);
-            bool negative = downMdY > mid.Y;
+            float dUpLtY = (Math.Abs(mid.x - left.x) >= 1 ? (mid.y - left.y) / (mid.x - left.x) : 0);
+            float dUpRtY = (Math.Abs(mid.x - right.x) >= 1 ? (mid.y - right.y) / (mid.x - right.x) : 0);
+            float dDownY = (Math.Abs(right.x - left.x) >= 1 ? (right.y - left.y) / (right.x - left.x) : 0);
+
+            float dUpLtZ = (mid.z - left.z) / (mid.x - left.x);
+            float dUpRtZ = (mid.z - right.z) / (mid.x - right.x);
+            float dDownZ = (right.z - left.z) / (right.x - left.x);
+
+            float upY = left.y;
+            float downY = left.y;
+            float downMdY = left.y + dDownY * (mid.x - left.x);
+            bool negative = downMdY > mid.y;
 
             if (negative)
             {
                 float temp = dDownY;
                 dDownY = dUpLtY;
                 dUpLtY = temp;
+                temp = dDownZ;
+                dDownZ = dUpLtZ;
+                dUpLtZ = temp;
             }
 
             for (int x = leftXI; x < midXI; x++)
             {
                 int mxY = (int)Math.Round(upY);
-                for (int y = (int)Math.Round(downY); y <= mxY; y++)
+
+                float upZ = left.z + dUpLtZ * (x - leftXI);
+                float downZ = left.z + dDownZ * (x - leftXI);
+                float dZ = (upZ - downZ) / (upY - downY);
+
+                int downYI = (int)Math.Round(downY);
+                for (int y = downYI; y <= mxY; y++)
                 {
                     if (x >= 0 && x < planeWidth && y >= 0 && y < planeHeight)
                     {
-                        byte* data = scan0 + y * stride + x * bitsPerPixel;
-                        data[0] = 200;
-                        data[1] = 20;
-                        data[2] = 20;
-                        data[3] = 255;
+                        float z = downZ + dZ * (y - downYI);
+                        if (z < zBuffer[x, y] || zBuffer[x, y] == 0)
+                        {
+                            byte* data = scan0 + y * stride + x * bitsPerPixel;
+                            data[0] = b;
+                            data[1] = g;
+                            data[2] = r;
+                            data[3] = 255;
+                            zBuffer[x, y] = z;
+                        }
                     }
                 }
                 downY += dDownY;
                 upY += dUpLtY;
             }
-            upY = mid.Y;
+            upY = mid.y;
             downY = downMdY;
             if (negative)
             {
                 dDownY = dUpRtY;
                 dUpRtY = dUpLtY;
+                dDownZ = dUpRtZ;
+                dUpRtZ = dUpLtZ;
+
                 upY = downMdY;
-                downY = mid.Y;
+                downY = mid.y;
             }
             for (int x = midXI; x < rightXI; x++)
             {
                 int mxY = (int)Math.Round(upY);
-                for (int y = (int)Math.Round(downY); y <= mxY; y++)
+
+                float upZ = mid.z + dUpRtZ * (rightXI - x);
+                float downZ = mid.z + dDownZ * (rightXI - x);
+                float dZ = (upZ - downZ) / (upY - downY);
+
+                int downYI = (int)Math.Round(downY);
+                for (int y = downYI; y <= mxY; y++)
                 {
                     if (x >= 0 && x < planeWidth && y >= 0 && y < planeHeight)
                     {
-                        byte* data = scan0 + y * stride + x * bitsPerPixel;
-                        data[0] = 200;
-                        data[1] = 20;
-                        data[2] = 20;
-                        data[3] = 255;
+                        float z = downZ + dZ * (y - downYI);
+                        if (z < zBuffer[x, y] || zBuffer[x, y] == 0)
+                        {
+                            byte* data = scan0 + y * stride + x * bitsPerPixel;
+                            data[0] = b;
+                            data[1] = g;
+                            data[2] = r;
+                            data[3] = 255;
+                            zBuffer[x, y] = z;
+                        }
                     }
                 }
                 downY += dDownY;
