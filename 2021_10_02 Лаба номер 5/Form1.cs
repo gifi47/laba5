@@ -105,11 +105,12 @@ namespace _2021_10_02_Лаба_номер_5
         {
             //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\makaka.obj", true);
             //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\ahri.obj", true);
+            monke = new Model("ahri.obj", true);
             //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\physic_final_ver.obj", true);
             //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\pistol.obj", true);
             planeZ = 1;
-            Translation = new Vector3(0, 0, 0);
-            //Translation = new Vector3(0, -2, 4);
+            //Translation = new Vector3(0, 0, 0);
+            Translation = new Vector3(0, -2, 4);
             angle_tick = 0.01f;
             ang = (float)Math.PI / 2;
             planeHeight = pictureBox1.Height;
@@ -139,14 +140,15 @@ namespace _2021_10_02_Лаба_номер_5
             //indeces = new int[] { 7, 3, 2, 2, 6, 7, 0, 4, 5, 5, 1, 0, 7, 4, 0, 0, 3, 7, 2, 1, 5, 5, 6, 2 };
             //indeces = new int[] { 7, 4, 0, 0, 3, 7, 2, 1, 5, 5, 6, 2 };
 
-            /*Center = new Vector3(monke.right - (monke.right - monke.left) / 2, monke.top - (monke.top - monke.bottom) / 2, monke.front - (monke.front - monke.back) / 2);
+            Center = new Vector3(monke.right - (monke.right - monke.left) / 2, monke.top - (monke.top - monke.bottom) / 2, monke.front - (monke.front - monke.back) / 2);
             Console.WriteLine($"Center: ({ Center.x }, { Center.y }, { Center.z })");
             vertices = monke.vertices;
-            indeces = monke.indeces;*/
+            indeces = monke.indeces;
             map = new Bitmap(planeWidth, planeWidth);
             pictureBox1.Image = map;
             lastCheck = DateTime.Now;
             frameCount = 0;
+            RotateBias(3.14f - 0.78f, false, true, false);
             Cycle();
         }
 
