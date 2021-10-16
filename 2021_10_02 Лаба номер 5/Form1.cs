@@ -19,7 +19,7 @@ namespace _2021_10_02_Лаба_номер_5
         }
 
         Bitmap map;
-        Vector3[] vertices;
+        Vertex[] vertices;
         int[] indeces;
         Vector3 Center;
         Vector3 Translation;
@@ -29,6 +29,7 @@ namespace _2021_10_02_Лаба_номер_5
         float planeZ;
         float scale;
         float ang;
+        Bitmap texture;
 
         float angle_tick = 0.1f;
         float selected_angle = 0.1f;
@@ -41,75 +42,57 @@ namespace _2021_10_02_Лаба_номер_5
 
         private void Render()
         {
-            Vector3[] pVertices = new Vector3[vertices.Length];
+            Vertex[] pVertices = new Vertex[vertices.Length];
+            Array.Copy(vertices, pVertices, vertices.Length);
             zBuffer = new float[planeWidth, planeHeight];
             for (int i = 0; i < vertices.Length; i++)
             {
-                pVertices[i] = Bias * (vertices[i] - Center) + Center + Translation;
-                float vZ = pVertices[i].z;
-                pVertices[i] = new Vector3(pVertices[i].x * planeZ / vZ * scale, pVertices[i].y * planeZ / vZ * scale, vZ);
-                pVertices[i].x += planeWidth / 2;
-                pVertices[i].y = (-pVertices[i].y) + planeHeight / 2;
+                pVertices[i].position = Bias * (vertices[i].position - Center) + Center + Translation;
+                float vZ = pVertices[i].position.z;
+                pVertices[i].position = new Vector3(pVertices[i].position.x * planeZ / vZ * scale, pVertices[i].position.y * planeZ / vZ * scale, vZ);
+                pVertices[i].position.x += planeWidth / 2;
+                pVertices[i].position.y = (-pVertices[i].position.y) + planeHeight / 2;
+                pVertices[i].texCoord.x *= texture.Width;
+                pVertices[i].texCoord.y *= texture.Height;
                 //Console.WriteLine($"vert {i} {pVertices[i].x}x {pVertices[i].y}y {pVertices[i].z}z");
             }
-            
             unsafe
             {
-                BitmapData bData = map.LockBits(new Rectangle(0, 0, planeWidth, planeHeight), ImageLockMode.ReadWrite, map.PixelFormat);
-                byte* scan0 = (byte*)bData.Scan0.ToPointer();
+                BitmapData mapData = map.LockBits(new Rectangle(0, 0, planeWidth, planeHeight), ImageLockMode.ReadWrite, map.PixelFormat);
+                BitmapData textureData = texture.LockBits(new Rectangle(0, 0, texture.Width, texture.Width), ImageLockMode.ReadWrite, texture.PixelFormat);
+                byte* scan0 = (byte*)mapData.Scan0.ToPointer();
                 int bitsPerPixel = Image.GetPixelFormatSize(map.PixelFormat) / 8;
-                for (int i = 0; i < indeces.Length; i += 3)
+
+                byte* textureScan0 = (byte*)textureData.Scan0.ToPointer();
+                int textureBitsPerPixel = Image.GetPixelFormatSize(texture.PixelFormat) / 8;
+                for (int i = 0; i < vertices.Length; i += 3)
                 {
-                    FillTriangle(scan0, bData.Stride, bitsPerPixel, pVertices[indeces[i]], pVertices[indeces[i + 1]], pVertices[indeces[i + 2]]);
+                    FillTriangle(scan0, mapData.Stride, bitsPerPixel, textureScan0, textureData.Stride, textureBitsPerPixel, ref zBuffer, ref pVertices[i], ref pVertices[i + 1], ref pVertices[i + 2]);
                 }
-                for (int i = 0; i < indeces.Length; i += 3)
+                /*for (int i = 0; i < indeces.Length; i += 3)
                 {
-                    DrawLine(scan0, bData.Stride, bitsPerPixel, pVertices[indeces[i]], pVertices[indeces[i + 1]]);
-                    DrawLine(scan0, bData.Stride, bitsPerPixel, pVertices[indeces[i + 1]], pVertices[indeces[i + 2]]);
-                    DrawLine(scan0, bData.Stride, bitsPerPixel, pVertices[indeces[i + 2]], pVertices[indeces[i]]);
-                }
-                map.UnlockBits(bData);
+                    DrawLine(scan0, mapData.Stride, bitsPerPixel, pVertices[i].position, pVertices[i + 1].position);
+                    DrawLine(scan0, mapData.Stride, bitsPerPixel, pVertices[i + 1].position, pVertices[i + 2].position);
+                    DrawLine(scan0, mapData.Stride, bitsPerPixel, pVertices[i + 2].position, pVertices[i].position);
+                }*/
+                map.UnlockBits(mapData);
+                texture.UnlockBits(textureData);
             }
-            /*for (int i = 0; i < indeces.Length; i += 3)
-            {
-                try
-                {
-                    FillTriangle(pVertices[indeces[i]], pVertices[indeces[i + 1]], pVertices[indeces[i + 2]], Color.Gold);
-                }
-                catch (Exception)
-                {
-                    map.Save(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\errors\img" + DateTime.Now.ToString("yyyy.MM.dd HH.mm.ss") + ".bmp");
-                }
-            }
-            for (int i = 0; i < indeces.Length; i+=3)
-            {
-                try
-                {
-                    DrawLine(pVertices[indeces[i]], pVertices[indeces[i + 1]], Color.Red);
-                    DrawLine(pVertices[indeces[i + 1]], pVertices[indeces[i + 2]], Color.Red);
-                    DrawLine(pVertices[indeces[i + 2]], pVertices[indeces[i]], Color.Red);
-                }
-                catch (Exception)
-                {
-                    map.Save(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\errors\img" + System.DateTime.Now.ToString("yyyy.MM.dd HH.mm.ss") + ".bmp");
-                }
-            }*/
-            /*for (int i = 0; i < indeces.Length - 1; i++)
-            {
-                DrawLine(pVertices[indeces[i]].toPointF(), pVertices[indeces[i + 1]].toPointF(), Color.Red);
-            }*/
         }
         
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            texture = new Bitmap(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\ahri.png");
             //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\makaka.obj", true);
-            //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\ahri.obj", true);
+            monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\ahri.obj", true);
+            //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\cube_t.obj", true);
             //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\physic_final_ver.obj", true);
             //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\pistol.obj", true);
             planeZ = 1;
-            Translation = new Vector3(0, 0, 0);
-            //Translation = new Vector3(0, -2, 4);
+            //Translation = new Vector3(0, 0, 0);
+            Translation = new Vector3(0, -2, 4);
+            //Translation = new Vector3(0, 0, 2.7f);
             angle_tick = 0.01f;
             ang = (float)Math.PI / 2;
             planeHeight = pictureBox1.Height;
@@ -117,8 +100,9 @@ namespace _2021_10_02_Лаба_номер_5
             scale = planeWidth / (2 * (float)Math.Tan(ang / 2) * planeZ);
             Console.WriteLine($"scale:{ scale }");
             Bias = new Vector3[] { new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1) };
+            RotateBias(3.14f - 0.14f, false, true, false);
             Center = new Vector3(0, 0, 15);
-            vertices = new Vector3[]{ 
+            /*vertices = new Vector3[]{ 
                 new Vector3(10, 10, 5), new Vector3(10, -10, 5), new Vector3(-10, -10, 5), new Vector3(-10, 10, 5),
                 new Vector3(10, 10, 25), new Vector3(10, -10, 25), new Vector3(-10, -10, 25), new Vector3(-10, 10, 25)
             };
@@ -131,7 +115,7 @@ namespace _2021_10_02_Лаба_номер_5
             vertices = new Vector3[]{
                 new Vector3(0.5f, 0.5f, 1), new Vector3(0.5f, -0.5f, 1f), new Vector3(-0.5f, -0.5f, 1f), new Vector3(-0.5f, 0.5f, 1f),
                 new Vector3(0.5f, 0.5f, 2), new Vector3(0.5f, -0.5f, 2), new Vector3(-0.5f, -0.5f, 2), new Vector3(-0.5f, 0.5f, 2)
-            };
+            };*/
 
             //vertices = new Vector3[]{ new Vector3(0, 0, 5), new Vector3(10, 0, 5), new Vector3(10, 10, 5), new Vector3(0, 10, 5) };
             indeces = new int[] { 0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4, 7, 3, 2, 2, 6, 7, 0, 4, 5, 5, 1, 0, 7, 4, 0, 0, 3, 7, 2, 1, 5, 5, 6, 2 };
@@ -139,10 +123,10 @@ namespace _2021_10_02_Лаба_номер_5
             //indeces = new int[] { 7, 3, 2, 2, 6, 7, 0, 4, 5, 5, 1, 0, 7, 4, 0, 0, 3, 7, 2, 1, 5, 5, 6, 2 };
             //indeces = new int[] { 7, 4, 0, 0, 3, 7, 2, 1, 5, 5, 6, 2 };
 
-            /*Center = new Vector3(monke.right - (monke.right - monke.left) / 2, monke.top - (monke.top - monke.bottom) / 2, monke.front - (monke.front - monke.back) / 2);
+            Center = new Vector3(monke.right - (monke.right - monke.left) / 2, monke.top - (monke.top - monke.bottom) / 2, monke.front - (monke.front - monke.back) / 2);
             Console.WriteLine($"Center: ({ Center.x }, { Center.y }, { Center.z })");
             vertices = monke.vertices;
-            indeces = monke.indeces;*/
+            //indeces = monke.indeces;
             map = new Bitmap(planeWidth, planeWidth);
             pictureBox1.Image = map;
             lastCheck = DateTime.Now;
@@ -277,52 +261,6 @@ namespace _2021_10_02_Лаба_номер_5
             }
         }
 
-        private PointF getMax(PointF[] points)
-        {
-            PointF max = points[0];
-            for (int i = 1; i < points.Length; i++)
-            {
-                if (points[i].X > max.X || (points[i].X == max.X && points[i].Y < max.Y))
-                {
-                    max = points[i];
-                }
-            }
-            return max;
-        }
-        private PointF getMin(PointF[] points)
-        {
-            PointF min = points[0];
-            for (int i = 1; i < points.Length; i++)
-            {
-                if (points[i].X < min.X || (points[i].X == min.X && points[i].Y > min.Y))
-                {
-                    min = points[i];
-                }
-            }
-            return min;
-        }
-        private void SortPoints(ref PointF left, ref PointF mid, ref PointF right)
-        {
-            PointF temp;
-            if (left.X > mid.X)
-            {
-                temp = left;
-                left = mid;
-                mid = temp;
-            }
-            if (right.X < mid.X)
-            {
-                temp = right;
-                right = mid;
-                mid = temp;
-            }
-            if (left.X > mid.X)
-            {
-                temp = left;
-                left = mid;
-                mid = temp;
-            }
-        }
         private void SortPoints(ref Vector3 left, ref Vector3 mid, ref Vector3 right)
         {
             Vector3 temp;
@@ -346,174 +284,210 @@ namespace _2021_10_02_Лаба_номер_5
             }
         }
 
-        private unsafe void FillTriangle(byte* scan0, int stride, int bitsPerPixel, Vector3 p1, Vector3 p2, Vector3 p3, byte r = 20, byte g = 20, byte b = 200)
+        private void SortVertices(ref Vertex left, ref Vertex mid, ref Vertex right)
         {
-            Vector3 left = p1;
-            Vector3 mid = p2;
-            Vector3 right = p3;
-            SortPoints(ref left, ref mid, ref right);
-
-            int leftXI = (int)Math.Round(left.x);
-            int midXI = (int)Math.Round(mid.x);
-            int rightXI = (int)Math.Round(right.x);
-
-            float dUpLtY = (Math.Abs(mid.x - left.x) >= 1 ? (mid.y - left.y) / (mid.x - left.x) : 0);
-            float dUpRtY = (Math.Abs(mid.x - right.x) >= 1 ? (mid.y - right.y) / (mid.x - right.x) : 0);
-            float dDownY = (Math.Abs(right.x - left.x) >= 1 ? (right.y - left.y) / (right.x - left.x) : 0);
-
-            float dUpLtZ = (mid.z - left.z) / (mid.x - left.x);
-            float dUpRtZ = (mid.z - right.z) / (mid.x - right.x);
-            float dDownZ = (right.z - left.z) / (right.x - left.x);
-
-            float upY = left.y;
-            float downY = left.y;
-            float downMdY = left.y + dDownY * (mid.x - left.x);
-            bool negative = downMdY > mid.y;
-
-            if (negative)
+            Vertex temp;
+            if (left.position.x > mid.position.x)
             {
-                float temp = dDownY;
-                dDownY = dUpLtY;
-                dUpLtY = temp;
-                temp = dDownZ;
-                dDownZ = dUpLtZ;
-                dUpLtZ = temp;
+                temp = left;
+                left = mid;
+                mid = temp;
             }
-
-            for (int x = leftXI; x < midXI; x++)
+            if (right.position.x < mid.position.x)
             {
-                int mxY = (int)Math.Round(upY);
-
-                float upZ = left.z + dUpLtZ * (x - leftXI);
-                float downZ = left.z + dDownZ * (x - leftXI);
-                float dZ = (upZ - downZ) / (upY - downY);
-
-                int downYI = (int)Math.Round(downY);
-                for (int y = downYI; y <= mxY; y++)
-                {
-                    if (x >= 0 && x < planeWidth && y >= 0 && y < planeHeight)
-                    {
-                        float z = downZ + dZ * (y - downYI);
-                        if (z < zBuffer[x, y] || zBuffer[x, y] == 0)
-                        {
-                            byte* data = scan0 + y * stride + x * bitsPerPixel;
-                            data[0] = b;
-                            data[1] = g;
-                            data[2] = r;
-                            data[3] = 255;
-                            zBuffer[x, y] = z;
-                        }
-                    }
-                }
-                downY += dDownY;
-                upY += dUpLtY;
+                temp = right;
+                right = mid;
+                mid = temp;
             }
-            upY = mid.y;
-            downY = downMdY;
-            if (negative)
+            if (left.position.x > mid.position.x)
             {
-                dDownY = dUpRtY;
-                dUpRtY = dUpLtY;
-                dDownZ = dUpRtZ;
-                dUpRtZ = dUpLtZ;
-
-                upY = downMdY;
-                downY = mid.y;
-            }
-            for (int x = midXI; x < rightXI; x++)
-            {
-                int mxY = (int)Math.Round(upY);
-
-                float upZ = mid.z + dUpRtZ * (rightXI - x);
-                float downZ = mid.z + dDownZ * (rightXI - x);
-                float dZ = (upZ - downZ) / (upY - downY);
-
-                int downYI = (int)Math.Round(downY);
-                for (int y = downYI; y <= mxY; y++)
-                {
-                    if (x >= 0 && x < planeWidth && y >= 0 && y < planeHeight)
-                    {
-                        float z = downZ + dZ * (y - downYI);
-                        if (z < zBuffer[x, y] || zBuffer[x, y] == 0)
-                        {
-                            byte* data = scan0 + y * stride + x * bitsPerPixel;
-                            data[0] = b;
-                            data[1] = g;
-                            data[2] = r;
-                            data[3] = 255;
-                            zBuffer[x, y] = z;
-                        }
-                    }
-                }
-                downY += dDownY;
-                upY += dUpRtY;
+                temp = left;
+                left = mid;
+                mid = temp;
             }
         }
 
-        private void FillTriangle(PointF p1, PointF p2, PointF p3, Color c)
+        private unsafe void FillTriangle(byte* scan0, int stride, int bitsPerPixel, byte* textureScan0, int textureStride, int textureBitsPerPixel, ref float[,] zBuffer, ref Vertex p1, ref Vertex p2, ref Vertex p3)
         {
-            //FillPolygon(new SolidBrush(Color.Blue), new PointF[]{ p1, p2, p3 });
-            PointF left = p1;//getMin(new PointF[]{ p1, p2, p3 });
-            PointF right = p3;//getMax(new PointF[]{ p1, p2, p3 });
-            PointF mid = p2;//(p1 == left || p1 == right ? (p2 == left || p2 == right ? p3 : p2) : p1);
-            SortPoints(ref left, ref mid, ref right);
+            Vertex left = p1;
+            Vertex mid = p2;
+            Vertex right = p3;
+            SortVertices(ref left, ref mid, ref right);
 
-            int leftXI = (int)Math.Round(left.X);
-            int midXI = (int)Math.Round(mid.X);
-            int rightXI = (int)Math.Round(right.X);
-            float dUpLtY = (Math.Abs(mid.X - left.X) >= 1 ? (mid.Y - left.Y) / (mid.X - left.X) : 0); 
-            //float dUpLtY = (Math.Abs(midXI - leftXI) >= 1 ? (mid.Y - left.Y) / (midXI - leftXI) : 0);
-            float dUpRtY = (Math.Abs(mid.X - right.X) >= 1 ? (mid.Y - right.Y) / (mid.X - right.X) : 0);
-            //float dUpRtY = (Math.Abs(midXI - rightXI) >= 1 ? (mid.Y - right.Y) / (midXI - rightXI) : 0);
-            float dDownY = (Math.Abs(right.X - left.X) >= 1 ? (right.Y - left.Y) / (right.X - left.X) : 0);
-            //float dDownY = (Math.Abs(rightXI - leftXI) >= 1 ? (right.Y - left.Y) / (rightXI - leftXI) : 0);
+            Vector3 left_to_right = new Vector3(0, (right.position.y - left.position.y) / (right.position.x - left.position.x), (right.position.z - left.position.z) / (right.position.x - left.position.x));
+            Vector3 left_to_mid = new Vector3(0, (mid.position.y - left.position.y) / (mid.position.x - left.position.x), (mid.position.z - left.position.z) / (mid.position.x - left.position.x));
+            Vector3 mid_to_right = new Vector3(0, (right.position.y - mid.position.y) / (right.position.x - mid.position.x), (right.position.z - mid.position.z) / (right.position.x - mid.position.x));
 
-            float upY = left.Y;
-            float downY = left.Y;
-            float downMdY = left.Y + dDownY * (mid.X - left.X);
-            bool negative = downMdY > mid.Y;
+            Vector2 texture_left_to_right = (right.texCoord - left.texCoord) / (right.position.x - left.position.x);
+            Vector2 texture_left_to_mid = (mid.texCoord - left.texCoord) / (mid.position.x - left.position.x);
+            Vector2 texture_mid_to_right = (right.texCoord - mid.texCoord) / (right.position.x - mid.position.x);
+            
+            float mid_y = left.position.y + left_to_right.y * (mid.position.x - left.position.x);
+            float mid_z = left.position.z + left_to_right.z * (mid.position.x - left.position.x);
 
-            if (negative)
+            float texture_mid_y = left.texCoord.y + texture_left_to_right.y * (mid.position.x - left.position.x);
+            float texture_mid_x = left.texCoord.x + texture_left_to_right.x * (mid.position.x - left.position.x);
+
+            if (mid_y < mid.position.y)
             {
-                float temp = dDownY;
-                dDownY = dUpLtY;
-                dUpLtY = temp;
-            }
+                Vector3 start = new Vector3(0, left.position.y, left.position.z);
+                Vector3 end = new Vector3(0, left.position.y, left.position.z);
 
-            for (int x = leftXI; x < midXI; x++)
-            {
-                int mxY = (int)Math.Round(upY);
-                for (int y = (int)Math.Round(downY); y <= mxY; y++)
+                Vector2 texture_start = left.texCoord;
+                Vector2 texture_end = left.texCoord;
+                for (int x = (int)left.position.x; x < (int)mid.position.x; x++)
                 {
-                    if (x >= 0 && x < planeWidth && y >= 0 && y < planeHeight)
+                    float start_to_end = (end.z - start.z) / (end.y - start.y);
+                    float z = start.z;
+
+                    Vector2 texture_start_to_end = (texture_end - texture_start) / (end.y - start.y);
+                    Vector2 texture_coord = texture_start;
+                    for (int y = (int)start.y; y <= (int)end.y; y++)
                     {
-                        map.SetPixel(x, y, c);
+                        if (x >= 0 && x < planeWidth && y >= 0 && y < planeHeight)
+                        {
+                            if (zBuffer[x, y] == 0 || zBuffer[x, y] > z)
+                            {
+                                int texture_x = Math.Min(Math.Max((int)texture_coord.x, 0), texture.Width - 1);
+                                int texture_y = Math.Min(Math.Max((int)texture_coord.y, 0), texture.Height - 1);
+                                byte* textureData = textureScan0 + texture_y * textureStride + texture_x * textureBitsPerPixel;
+                                byte* data = scan0 + y * stride + x * bitsPerPixel;
+                                data[0] = textureData[0];
+                                data[1] = textureData[1];
+                                data[2] = textureData[2];
+                                data[3] = 255;
+                                zBuffer[x, y] = z;
+
+                            }
+                        }
+                        z += start_to_end;
+                        texture_coord += texture_start_to_end;
                     }
+                    start += left_to_right;
+                    end += left_to_mid;
+
+                    texture_start += texture_left_to_right;
+                    texture_end += texture_left_to_mid;
                 }
-                downY += dDownY;
-                upY += dUpLtY;
-            }
-            upY = mid.Y;
-            downY = downMdY;
-            if (negative)
-            {
-                dDownY = dUpRtY;
-                dUpRtY = dUpLtY;
-                upY = downMdY;
-                downY = mid.Y;
-            }
-            for (int x = midXI; x < rightXI; x++)
-            {
-                int mxY = (int)Math.Round(upY);
-                for (int y = (int)Math.Round(downY); y <= mxY; y++)
+
+                start = new Vector3(0, mid_y, mid_z);
+                end = new Vector3(0, mid.position.y, mid.position.z);
+
+                texture_start = new Vector2(texture_mid_x, texture_mid_y);
+                texture_end = mid.texCoord;
+                for (int x = (int)mid.position.x; x < (int)right.position.x; x++)
                 {
-                    if (x >= 0 && x < planeWidth && y >= 0 && y < planeHeight)
+                    float start_to_end = (end.z - start.z) / (end.y - start.y);
+                    float z = start.z;
+
+                    Vector2 texture_start_to_end = (texture_end - texture_start) / (end.y - start.y);
+                    Vector2 texture_coord = texture_start;
+                    for (int y = (int)start.y; y <= (int)end.y; y++)
                     {
-                        map.SetPixel(x, y, c);
+                        if (x >= 0 && x < planeWidth && y >= 0 && y < planeHeight)
+                        {
+                            if (zBuffer[x, y] == 0 || zBuffer[x, y] > z)
+                            {
+                                int texture_x = Math.Min(Math.Max((int)texture_coord.x, 0), texture.Width - 1);
+                                int texture_y = Math.Min(Math.Max((int)texture_coord.y, 0), texture.Height - 1);
+                                byte* textureData = textureScan0 + texture_y * textureStride + texture_x * textureBitsPerPixel;
+                                byte* data = scan0 + y * stride + x * bitsPerPixel;
+                                data[0] = textureData[0];
+                                data[1] = textureData[1];
+                                data[2] = textureData[2];
+                                data[3] = 255;
+                                zBuffer[x, y] = z;
+                            }
+                        }
+                        z += start_to_end;
+                        texture_coord += texture_start_to_end;
                     }
+                    start += left_to_right;
+                    end += mid_to_right;
+
+                    texture_start += texture_left_to_right;
+                    texture_end += texture_mid_to_right;
                 }
-                downY += dDownY;
-                upY += dUpRtY;
+            }
+            else
+            {
+                Vector3 start = new Vector3(0, left.position.y, left.position.z);
+                Vector3 end = new Vector3(0, left.position.y, left.position.z);
+
+                Vector2 texture_start = left.texCoord;
+                Vector2 texture_end = left.texCoord;
+                for (int x = (int)left.position.x; x < (int)mid.position.x; x++)
+                {
+                    float start_to_end = (end.z - start.z) / (end.y - start.y);
+                    float z = start.z;
+
+                    Vector2 texture_start_to_end = (texture_end - texture_start) / (end.y - start.y);
+                    Vector2 texture_coord = texture_start;
+                    for (int y = (int)start.y; y <= (int)end.y; y++)
+                    {
+                        if (x >= 0 && x < planeWidth && y >= 0 && y < planeHeight)
+                        {
+                            if (zBuffer[x, y] == 0 || zBuffer[x, y] > z)
+                            {
+                                int texture_x = Math.Min(Math.Max((int)texture_coord.x, 0), texture.Width - 1);
+                                int texture_y = Math.Min(Math.Max((int)texture_coord.y, 0), texture.Height - 1);
+                                byte* textureData = textureScan0 + texture_y * textureStride + texture_x * textureBitsPerPixel;
+                                byte* data = scan0 + y * stride + x * bitsPerPixel;
+                                data[0] = textureData[0];
+                                data[1] = textureData[1];
+                                data[2] = textureData[2];
+                                data[3] = 255;
+                                zBuffer[x, y] = z;
+                            }
+                        }
+                        z += start_to_end;
+                        texture_coord += texture_start_to_end;
+                    }
+                    start += left_to_mid;
+                    end += left_to_right;
+
+                    texture_start += texture_left_to_mid;
+                    texture_end += texture_left_to_right;
+                }
+
+                start = new Vector3(0, mid.position.y, mid.position.z);
+                end = new Vector3(0, mid_y, mid_z);
+
+                texture_start = mid.texCoord; 
+                texture_end = new Vector2(texture_mid_x, texture_mid_y);
+                for (int x = (int)mid.position.x; x < (int)right.position.x; x++)
+                {
+                    float start_to_end = (end.z - start.z) / (end.y - start.y);
+                    float z = start.z;
+
+                    Vector2 texture_start_to_end = (texture_end - texture_start) / (end.y - start.y);
+                    Vector2 texture_coord = texture_start;
+                    for (int y = (int)start.y; y <= (int)end.y; y++)
+                    {
+                        if (x >= 0 && x < planeWidth && y >= 0 && y < planeHeight)
+                        {
+                            if (zBuffer[x, y] == 0 || zBuffer[x, y] > z)
+                            {
+                                int texture_x = Math.Min(Math.Max((int)texture_coord.x, 0), texture.Width - 1);
+                                int texture_y = Math.Min(Math.Max((int)texture_coord.y, 0), texture.Height - 1);
+                                byte* textureData = textureScan0 + texture_y * textureStride + texture_x * textureBitsPerPixel;
+                                byte* data = scan0 + y * stride + x * bitsPerPixel;
+                                data[0] = textureData[0];
+                                data[1] = textureData[1];
+                                data[2] = textureData[2];
+                                data[3] = 255;
+                                zBuffer[x, y] = z;
+                            }
+                        }
+                        z += start_to_end;
+                        texture_coord += texture_start_to_end;
+                    }
+                    start += mid_to_right;
+                    end += left_to_right;
+
+                    texture_start += texture_mid_to_right;
+                    texture_end += texture_left_to_right;
+                }
             }
         }
 
@@ -541,12 +515,6 @@ namespace _2021_10_02_Лаба_номер_5
 
         private void button1_Click(object sender, EventArgs e)
         {
-            //map = new Bitmap(planeWidth, planeHeight);
-            //Render();
-            //DrawLine(new PointF(20, 20), new PointF(300, 300), Color.Red);
-            //DrawLine(new PointF(300, 300), new PointF(30, 30), Color.Red);
-            //DrawLine(new PointF(200, 200), new PointF(30, 200), Color.Red);
-            //pictureBox1.Image = map;
             timer1.Enabled = !timer1.Enabled;
         }
 
@@ -562,17 +530,10 @@ namespace _2021_10_02_Лаба_номер_5
 
         private void button2_Click(object sender, EventArgs e)
         {
-            //FillTriangle(new PointF(10, 10), new PointF(200, 10), new PointF(95, 140));
-            //RotateBias((float)Math.PI / 8, false, true, false);
-            map = new Bitmap(planeWidth, planeHeight);
-            /*FillTriangle(new PointF(30, 200), new PointF(100, 150), new PointF(170, 200));
-            FillTriangle(new PointF(30, 30), new PointF(100, 150), new PointF(170, 30));
-            FillTriangle(new PointF(1, 100), new PointF(1, 200), new PointF(100, 150));
-            FillTriangle(new PointF(101, 150), new PointF(200, 200), new PointF(200, 100));*/
-
-            FillTriangle(new PointF(74.25013f, 224.219818f), new PointF(112.684692f, 113.438416f), new PointF(75.7498856f, 74.27984f), Color.DarkMagenta);
-            //Render();
-            pictureBox1.Image = map;
+            //map = new Bitmap(planeWidth, planeHeight);
+            //pictureBox1.Image = map;
+            Bias = new Vector3[] { new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1) };
+            Cycle();
         }
 
         private void buttonQ_Click(object sender, EventArgs e)
@@ -693,6 +654,73 @@ namespace _2021_10_02_Лаба_номер_5
         }
     }
 
+    struct Vector2
+    {
+        public float x, y;
+        public Vector2(float x, float y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+        public static Vector2 operator +(Vector2 v1, Vector2 v2)
+        {
+            return new Vector2(v1.x + v2.x, v1.y + v2.y);
+        }
+        public static Vector2 operator -(Vector2 v1, Vector2 v2)
+        {
+            return new Vector2(v1.x - v2.x, v1.y - v2.y);
+        }
+        public static Vector2 operator *(Vector2 v1, float value)
+        {
+            return new Vector2(v1.x * value, v1.y * value);
+        }
+        public static Vector2 operator /(Vector2 v1, float value)
+        {
+            return new Vector2(v1.x / value, v1.y / value);
+        }
+    }
+
+    struct Vertex
+    {
+        public Vector3 position;
+        public RGBA color;
+        public Vector2 texCoord;
+        public Vector3 normal;
+        public Vertex(Vector3 position, RGBA color, Vector2 texCoord, Vector3 normal)
+        {
+            this.position = position;
+            this.color = color;
+            this.texCoord = texCoord;
+            this.normal = normal;
+        }
+        public Vertex(Vector3 position, Vector2 texCoord, Vector3 normal)
+        {
+            this.position = position;
+            this.color = new RGBA(255, 255, 255);
+            this.texCoord = texCoord;
+            this.normal = normal;
+        }
+    }
+
+    struct RGBA
+    {
+        public byte r, g, b, a;
+        public RGBA(byte r, byte g, byte b, byte a)
+        {
+            this.r = r;
+            this.g = g;
+            this.b = b;
+            this.a = a;
+        }
+        public RGBA(byte r, byte g, byte b)
+        {
+            this.r = r;
+            this.g = g;
+            this.b = b;
+            this.a = 255;
+        }
+    }
+
     struct Mat3
     {
         public Vector3 x, y, z;
@@ -727,8 +755,7 @@ namespace _2021_10_02_Лаба_номер_5
 
     class Model
     {
-        public Vector3[] vertices;
-        public int[] indeces;
+        public Vertex[] vertices;
         public float top;
         public float bottom;
         public float right;
@@ -737,16 +764,29 @@ namespace _2021_10_02_Лаба_номер_5
         public float back;
         public Model(string filename, bool findBounds = false)
         {
-            List<Vector3> vertices = new List<Vector3>();
-            List<int> indeces = new List<int>();
+            List<Vector3> positions = new List<Vector3>();
+            List<Vector2> textureCoords = new List<Vector2>();
+            List<Vector3> normals = new List<Vector3>();
+            List<int[]> indeces = new List<int[]>();
             foreach (string line in System.IO.File.ReadLines(filename))
             {
                 string[] words = line.Split(new char[] { ' ' });
                 switch (words[0])
                 {
                     case "v":
-                        vertices.Add(new Vector3(
+                        positions.Add(new Vector3(
                             float.Parse(words[1], System.Globalization.CultureInfo.InvariantCulture), 
+                            float.Parse(words[2], System.Globalization.CultureInfo.InvariantCulture),
+                            float.Parse(words[3], System.Globalization.CultureInfo.InvariantCulture)));
+                        break;
+                    case "vt":
+                        textureCoords.Add(new Vector2(
+                            float.Parse(words[1], System.Globalization.CultureInfo.InvariantCulture),
+                            float.Parse(words[2], System.Globalization.CultureInfo.InvariantCulture)));
+                        break;
+                    case "vn":
+                        normals.Add(new Vector3(
+                            float.Parse(words[1], System.Globalization.CultureInfo.InvariantCulture),
                             float.Parse(words[2], System.Globalization.CultureInfo.InvariantCulture),
                             float.Parse(words[3], System.Globalization.CultureInfo.InvariantCulture)));
                         break;
@@ -754,9 +794,7 @@ namespace _2021_10_02_Лаба_номер_5
                         for (int i = 1; i < 4; i++)
                         {
                             string[] inds = words[i].Split(new char[] { '/' });
-                            indeces.Add(int.Parse(inds[0]) - 1);
-                            //indeces.Add(int.Parse(inds[1]) - 1);
-                            //indeces.Add(int.Parse(inds[2]) - 1);
+                            indeces.Add(new int[] { GetIndex(inds[0]), GetIndex(inds[1]), GetIndex(inds[2]) });
                         }
                         break;
                             
@@ -764,20 +802,22 @@ namespace _2021_10_02_Лаба_номер_5
                         continue;                   
                 }
             }
-            this.vertices = vertices.ToArray();
-            this.indeces = indeces.ToArray();
+            this.vertices = new Vertex[indeces.Count];
+            for (int i = 0; i < this.vertices.Length; i++)
+            {
+                this.vertices[i] = new Vertex(positions[indeces[i][0]], textureCoords[indeces[i][1]], normals[indeces[i][2]]);
+            }
             Console.WriteLine($"vertices loaded: {this.vertices.Length}");
-            Console.WriteLine($"tris: {this.indeces.Length / 3}");
             if (findBounds)
             {
-                foreach(Vector3 vertex in this.vertices)
+                for (int i = 0; i < this.vertices.Length; i++)
                 {
-                    if (vertex.x > this.right) this.right = vertex.x;
-                    if (vertex.x < this.left) this.left = vertex.x;
-                    if (vertex.y > this.top) this.top = vertex.y;
-                    if (vertex.y < this.bottom) this.bottom = vertex.y;
-                    if (vertex.z > this.front) this.front = vertex.z;
-                    if (vertex.z < this.back) this.back = vertex.z;
+                    if (vertices[i].position.x > this.right) this.right = vertices[i].position.x;
+                    if (vertices[i].position.x < this.left) this.left = vertices[i].position.x;
+                    if (vertices[i].position.y > this.top) this.top = vertices[i].position.y;
+                    if (vertices[i].position.y < this.bottom) this.bottom = vertices[i].position.y;
+                    if (vertices[i].position.z > this.front) this.front = vertices[i].position.z;
+                    if (vertices[i].position.z < this.back) this.back = vertices[i].position.z;
                 }
                 Console.WriteLine($"right =  {this.right}");
                 Console.WriteLine($"left =  {this.left}");
@@ -785,8 +825,13 @@ namespace _2021_10_02_Лаба_номер_5
                 Console.WriteLine($"bottom =  {this.bottom}");
                 Console.WriteLine($"front =  {this.front}");
                 Console.WriteLine($"back =  {this.back}");
-
             }
+        }
+
+        private int GetIndex(string value)
+        {
+            if (value == "") return 0;
+            return int.Parse(value) - 1;
         }
     }
 }
