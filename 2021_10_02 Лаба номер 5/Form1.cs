@@ -37,6 +37,8 @@ namespace _2021_10_02_Лаба_номер_5
         DateTime lastCheck;
         long frameCount;
 
+        Random random;
+
         float[,] zBuffer;
 
         private void Render()
@@ -60,14 +62,14 @@ namespace _2021_10_02_Лаба_номер_5
                 int bitsPerPixel = Image.GetPixelFormatSize(map.PixelFormat) / 8;
                 for (int i = 0; i < indeces.Length; i += 3)
                 {
-                    FillTriangle(scan0, bData.Stride, bitsPerPixel, pVertices[indeces[i]], pVertices[indeces[i + 1]], pVertices[indeces[i + 2]]);
+                    FillTriangle(scan0, bData.Stride, bitsPerPixel, pVertices[indeces[i]], pVertices[indeces[i + 1]], pVertices[indeces[i + 2]], (byte)random.Next(0, 256), (byte)random.Next(0, 256), (byte)random.Next(0, 256));
                 }
-                for (int i = 0; i < indeces.Length; i += 3)
+                /*for (int i = 0; i < indeces.Length; i += 3)
                 {
                     DrawLine(scan0, bData.Stride, bitsPerPixel, pVertices[indeces[i]], pVertices[indeces[i + 1]]);
                     DrawLine(scan0, bData.Stride, bitsPerPixel, pVertices[indeces[i + 1]], pVertices[indeces[i + 2]]);
                     DrawLine(scan0, bData.Stride, bitsPerPixel, pVertices[indeces[i + 2]], pVertices[indeces[i]]);
-                }
+                }*/
                 map.UnlockBits(bData);
             }
             /*for (int i = 0; i < indeces.Length; i += 3)
@@ -103,12 +105,13 @@ namespace _2021_10_02_Лаба_номер_5
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            random = new Random((int)DateTime.Now.ToBinary());
             //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\makaka.obj", true);
-            //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\ahri.obj", true);
+            monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\freddy.obj", true);
             //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\physic_final_ver.obj", true);
             //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\pistol.obj", true);
             planeZ = 1;
-            Translation = new Vector3(0, 0, 0);
+            Translation = new Vector3(0, -7, 10);
             //Translation = new Vector3(0, -2, 4);
             angle_tick = 0.01f;
             ang = (float)Math.PI / 2;
@@ -139,10 +142,10 @@ namespace _2021_10_02_Лаба_номер_5
             //indeces = new int[] { 7, 3, 2, 2, 6, 7, 0, 4, 5, 5, 1, 0, 7, 4, 0, 0, 3, 7, 2, 1, 5, 5, 6, 2 };
             //indeces = new int[] { 7, 4, 0, 0, 3, 7, 2, 1, 5, 5, 6, 2 };
 
-            /*Center = new Vector3(monke.right - (monke.right - monke.left) / 2, monke.top - (monke.top - monke.bottom) / 2, monke.front - (monke.front - monke.back) / 2);
+            Center = new Vector3(monke.right - (monke.right - monke.left) / 2, monke.top - (monke.top - monke.bottom) / 2, monke.front - (monke.front - monke.back) / 2);
             Console.WriteLine($"Center: ({ Center.x }, { Center.y }, { Center.z })");
             vertices = monke.vertices;
-            indeces = monke.indeces;*/
+            indeces = monke.indeces;
             map = new Bitmap(planeWidth, planeWidth);
             pictureBox1.Image = map;
             lastCheck = DateTime.Now;

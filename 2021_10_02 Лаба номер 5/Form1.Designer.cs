@@ -52,7 +52,7 @@ namespace _2021_10_02_Лаба_номер_5
             // 
             this.pictureBox1.Location = new System.Drawing.Point(83, 2);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(300, 300);
+            this.pictureBox1.Size = new System.Drawing.Size(800, 800);
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
@@ -63,7 +63,7 @@ namespace _2021_10_02_Лаба_номер_5
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(0, 329);
+            this.button1.Location = new System.Drawing.Point(917, 452);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 1;
@@ -73,7 +73,7 @@ namespace _2021_10_02_Лаба_номер_5
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(0, 358);
+            this.button2.Location = new System.Drawing.Point(917, 481);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(75, 23);
             this.button2.TabIndex = 2;
@@ -83,7 +83,7 @@ namespace _2021_10_02_Лаба_номер_5
             // 
             // buttonW
             // 
-            this.buttonW.Location = new System.Drawing.Point(201, 329);
+            this.buttonW.Location = new System.Drawing.Point(1118, 452);
             this.buttonW.Name = "buttonW";
             this.buttonW.Size = new System.Drawing.Size(50, 50);
             this.buttonW.TabIndex = 3;
@@ -93,7 +93,7 @@ namespace _2021_10_02_Лаба_номер_5
             // 
             // buttonS
             // 
-            this.buttonS.Location = new System.Drawing.Point(201, 385);
+            this.buttonS.Location = new System.Drawing.Point(1118, 508);
             this.buttonS.Name = "buttonS";
             this.buttonS.Size = new System.Drawing.Size(50, 50);
             this.buttonS.TabIndex = 4;
@@ -103,7 +103,7 @@ namespace _2021_10_02_Лаба_номер_5
             // 
             // buttonD
             // 
-            this.buttonD.Location = new System.Drawing.Point(257, 385);
+            this.buttonD.Location = new System.Drawing.Point(1174, 508);
             this.buttonD.Name = "buttonD";
             this.buttonD.Size = new System.Drawing.Size(50, 50);
             this.buttonD.TabIndex = 6;
@@ -113,7 +113,7 @@ namespace _2021_10_02_Лаба_номер_5
             // 
             // buttonE
             // 
-            this.buttonE.Location = new System.Drawing.Point(257, 329);
+            this.buttonE.Location = new System.Drawing.Point(1174, 452);
             this.buttonE.Name = "buttonE";
             this.buttonE.Size = new System.Drawing.Size(50, 50);
             this.buttonE.TabIndex = 5;
@@ -123,7 +123,7 @@ namespace _2021_10_02_Лаба_номер_5
             // 
             // buttonA
             // 
-            this.buttonA.Location = new System.Drawing.Point(145, 385);
+            this.buttonA.Location = new System.Drawing.Point(1062, 508);
             this.buttonA.Name = "buttonA";
             this.buttonA.Size = new System.Drawing.Size(50, 50);
             this.buttonA.TabIndex = 8;
@@ -133,7 +133,7 @@ namespace _2021_10_02_Лаба_номер_5
             // 
             // buttonQ
             // 
-            this.buttonQ.Location = new System.Drawing.Point(145, 329);
+            this.buttonQ.Location = new System.Drawing.Point(1062, 452);
             this.buttonQ.Name = "buttonQ";
             this.buttonQ.Size = new System.Drawing.Size(50, 50);
             this.buttonQ.TabIndex = 7;
@@ -145,7 +145,7 @@ namespace _2021_10_02_Лаба_номер_5
             // 
             this.comboBox1.FormatString = "N6";
             this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(347, 329);
+            this.comboBox1.Location = new System.Drawing.Point(1264, 452);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(121, 21);
             this.comboBox1.TabIndex = 10;
@@ -153,7 +153,7 @@ namespace _2021_10_02_Лаба_номер_5
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(347, 356);
+            this.button3.Location = new System.Drawing.Point(1264, 479);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(121, 23);
             this.button3.TabIndex = 11;
@@ -163,7 +163,7 @@ namespace _2021_10_02_Лаба_номер_5
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(347, 412);
+            this.button4.Location = new System.Drawing.Point(1264, 535);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(121, 23);
             this.button4.TabIndex = 13;
@@ -175,7 +175,7 @@ namespace _2021_10_02_Лаба_номер_5
             // 
             this.comboBox2.FormatString = "N6";
             this.comboBox2.FormattingEnabled = true;
-            this.comboBox2.Location = new System.Drawing.Point(347, 385);
+            this.comboBox2.Location = new System.Drawing.Point(1264, 508);
             this.comboBox2.Name = "comboBox2";
             this.comboBox2.Size = new System.Drawing.Size(121, 21);
             this.comboBox2.TabIndex = 12;
@@ -193,7 +193,7 @@ namespace _2021_10_02_Лаба_номер_5
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(470, 532);
+            this.ClientSize = new System.Drawing.Size(1399, 861);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.comboBox2);
