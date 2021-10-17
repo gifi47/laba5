@@ -40,7 +40,7 @@ namespace _2021_10_02_Лаба_номер_5
 
         float[,] zBuffer;
 
-        private void Render()
+        private void Render(bool a = true)
         {
             Vertex[] pVertices = new Vertex[vertices.Length];
             Array.Copy(vertices, pVertices, vertices.Length);
@@ -65,16 +65,19 @@ namespace _2021_10_02_Лаба_номер_5
 
                 byte* textureScan0 = (byte*)textureData.Scan0.ToPointer();
                 int textureBitsPerPixel = Image.GetPixelFormatSize(texture.PixelFormat) / 8;
+                if (a)
+                {
+                    for (int i = 0; i < vertices.Length; i += 3)
+                    {
+                        DrawLine(scan0, mapData.Stride, bitsPerPixel, ref zBuffer, pVertices[i].position, pVertices[i + 1].position);
+                        DrawLine(scan0, mapData.Stride, bitsPerPixel, ref zBuffer, pVertices[i + 1].position, pVertices[i + 2].position);
+                        DrawLine(scan0, mapData.Stride, bitsPerPixel, ref zBuffer, pVertices[i + 2].position, pVertices[i].position);
+                    }
+                }
                 for (int i = 0; i < vertices.Length; i += 3)
                 {
                     FillTriangle(scan0, mapData.Stride, bitsPerPixel, textureScan0, textureData.Stride, textureBitsPerPixel, ref zBuffer, ref pVertices[i], ref pVertices[i + 1], ref pVertices[i + 2]);
                 }
-                /*for (int i = 0; i < indeces.Length; i += 3)
-                {
-                    DrawLine(scan0, mapData.Stride, bitsPerPixel, pVertices[i].position, pVertices[i + 1].position);
-                    DrawLine(scan0, mapData.Stride, bitsPerPixel, pVertices[i + 1].position, pVertices[i + 2].position);
-                    DrawLine(scan0, mapData.Stride, bitsPerPixel, pVertices[i + 2].position, pVertices[i].position);
-                }*/
                 map.UnlockBits(mapData);
                 texture.UnlockBits(textureData);
             }
@@ -92,7 +95,7 @@ namespace _2021_10_02_Лаба_номер_5
             planeZ = 1;
             //Translation = new Vector3(0, 0, 0);
             Translation = new Vector3(0, -2, 4);
-            //Translation = new Vector3(0, 0, 2.7f);
+            //Translation = new Vector3(0, 0, 3f);
             angle_tick = 0.01f;
             ang = (float)Math.PI / 2;
             planeHeight = pictureBox1.Height;
@@ -141,6 +144,83 @@ namespace _2021_10_02_Лаба_номер_5
             double fps = count / secondsElapsed;
             lastCheck = DateTime.Now;
             return fps;
+        }
+
+        private unsafe void DrawLine(byte* scan0, int stride, int bitsPerPixel, ref float[,] zBuffer, Vector3 p1, Vector3 p2)
+        {
+            int start, end;
+            if (Math.Abs(p1.x - p2.x) > Math.Abs(p1.y - p2.y))
+            {
+                start = (int)Math.Floor(p1.x); end = (int)Math.Floor(p2.x);
+                if (start > end)
+                {
+                    int temp = start;
+                    start = end;
+                    end = temp;
+                    Vector3 tem = p1;
+                    p1 = p2;
+                    p2 = tem;
+                }
+                Vector3 d = (p2 - p1) / (p2.x - p1.x);
+                float y = p1.y;
+                float z = p1.z;
+                end = Math.Min(planeWidth - 1, Math.Max(1, end));
+                start = Math.Max(1, Math.Min(planeWidth - 1, start));
+                for (int x = start; x <= end; x++)
+                {
+                    int yI = (int)Math.Floor(y);
+                    if (0 <= y && y < planeHeight)
+                    {
+                        if (zBuffer[x, yI] == 0 || zBuffer[x, yI] > z)
+                        {
+                            byte* data = scan0 + yI * stride + x * bitsPerPixel;
+                            data[0] = 20;
+                            data[1] = 200;
+                            data[2] = 20;
+                            data[3] = 255;
+                            zBuffer[x, yI] = z;
+                        }
+                    }
+                    y += d.y;
+                    z += d.z;
+                }
+            }
+            else
+            {
+                start = (int)Math.Floor(p1.y); end = (int)Math.Floor(p2.y);
+                if (start > end)
+                {
+                    int temp = start;
+                    start = end;
+                    end = temp;
+                    Vector3 tem = p1;
+                    p1 = p2;
+                    p2 = tem;
+                }
+                Vector3 d = (p2 - p1) / (p2.y - p1.y);
+                float x = p1.x;
+                float z = p1.z;
+                end = Math.Min(planeHeight - 1, Math.Max(1, end));
+                start = Math.Max(1, Math.Min(planeHeight - 1, start));
+                for (int y = start; y <= end; y++)
+                {
+                    int xI = (int)Math.Floor(x);
+                    if (x >= 0 && x < planeWidth)
+                    {
+                        if (zBuffer[xI, y] == 0 || zBuffer[xI, y] > z)
+                        {
+                            byte* data = scan0 + y * stride + xI * bitsPerPixel;
+                            data[0] = 20;
+                            data[1] = 200;
+                            data[2] = 20;
+                            data[3] = 255;
+                            zBuffer[xI, y] = z;
+                        }
+                    }
+                    x += d.x;
+                    z += d.z;
+                }
+            }
         }
 
         private unsafe void DrawLine(byte* scan0, int stride, int bitsPerPixel, PointF p1, PointF p2)
@@ -507,9 +587,18 @@ namespace _2021_10_02_Лаба_номер_5
         private void Cycle()
         {
             System.Threading.Interlocked.Increment(ref frameCount);
+            planeHeight = pictureBox1.Height;
+            planeWidth = pictureBox1.Width;
+            scale = planeWidth / (2 * (float)Math.Tan(ang / 2) * planeZ);
             map = new Bitmap(planeWidth, planeHeight);
             Render();
             pictureBox1.Image = map;
+            planeHeight = pictureBox2.Height;
+            planeWidth = pictureBox2.Width;
+            scale = planeWidth / (2 * (float)Math.Tan(ang / 2) * planeZ);
+            map = new Bitmap(planeWidth, planeHeight);
+            Render(false);
+            pictureBox2.Image = map;
             label1.Text = GetFps().ToString() + " fps";
         }
 
@@ -647,6 +736,10 @@ namespace _2021_10_02_Лаба_номер_5
         public static Vector3 operator *(Vector3 v1, float value)
         {
             return new Vector3(v1.x * value, v1.y * value, v1.z * value);
+        }
+        public static Vector3 operator /(Vector3 v1, float value)
+        {
+            return new Vector3(v1.x / value, v1.y / value, v1.z / value);
         }
         public static implicit operator PointF(Vector3 v1)
         {
