@@ -20,7 +20,6 @@ namespace _2021_10_02_Лаба_номер_5
 
         Bitmap map;
         Vertex[] vertices;
-        int[] indeces;
         Vector3 Center;
         Vector3 Translation;
         Mat3 Bias;
@@ -34,32 +33,31 @@ namespace _2021_10_02_Лаба_номер_5
         float angle_tick = 0.1f;
         float selected_angle = 0.1f;
 
-        Model monke;
+        Model model;
         DateTime lastCheck;
         long frameCount;
 
         float[,] zBuffer;
 
-        private void Render(bool a = true)
+        private void Render(bool a = false)
         {
             Vertex[] pVertices = new Vertex[vertices.Length];
             Array.Copy(vertices, pVertices, vertices.Length);
             zBuffer = new float[planeWidth, planeHeight];
             for (int i = 0; i < vertices.Length; i++)
             {
-                pVertices[i].position = Bias * (vertices[i].position - Center) + Center + Translation;
+                pVertices[i].position = Bias * (vertices[i].position - Center) + Center + Translation;     
                 float vZ = pVertices[i].position.z;
                 pVertices[i].position = new Vector3(pVertices[i].position.x * planeZ / vZ * scale, pVertices[i].position.y * planeZ / vZ * scale, vZ);
                 pVertices[i].position.x += planeWidth / 2;
                 pVertices[i].position.y = (-pVertices[i].position.y) + planeHeight / 2;
                 pVertices[i].texCoord.x *= texture.Width;
                 pVertices[i].texCoord.y *= texture.Height;
-                //Console.WriteLine($"vert {i} {pVertices[i].x}x {pVertices[i].y}y {pVertices[i].z}z");
             }
             unsafe
             {
                 BitmapData mapData = map.LockBits(new Rectangle(0, 0, planeWidth, planeHeight), ImageLockMode.ReadWrite, map.PixelFormat);
-                BitmapData textureData = texture.LockBits(new Rectangle(0, 0, texture.Width, texture.Width), ImageLockMode.ReadWrite, texture.PixelFormat);
+                BitmapData textureData = texture.LockBits(new Rectangle(0, 0, texture.Width, texture.Width), ImageLockMode.ReadOnly, texture.PixelFormat);
                 byte* scan0 = (byte*)mapData.Scan0.ToPointer();
                 int bitsPerPixel = Image.GetPixelFormatSize(map.PixelFormat) / 8;
 
@@ -86,50 +84,19 @@ namespace _2021_10_02_Лаба_номер_5
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            texture = new Bitmap(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\ahri.png");
-            //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\makaka.obj", true);
-            monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\ahri.obj", true);
-            //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\cube_t.obj", true);
-            //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\physic_final_ver.obj", true);
-            //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\pistol.obj", true);
+            texture = new Bitmap(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\Cube_t_uv_2.png");
+            model = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\cube_t_uv.obj", true);
             planeZ = 1;
-            //Translation = new Vector3(0, 0, 0);
-            Translation = new Vector3(0, -2, 4);
-            //Translation = new Vector3(0, 0, 3f);
+            Translation = new Vector3(0, 0, 3);
             angle_tick = 0.01f;
             ang = (float)Math.PI / 2;
             planeHeight = pictureBox1.Height;
             planeWidth = pictureBox1.Width;
             scale = planeWidth / (2 * (float)Math.Tan(ang / 2) * planeZ);
-            Console.WriteLine($"scale:{ scale }");
             Bias = new Vector3[] { new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1) };
-            RotateBias(3.14f - 0.14f, false, true, false);
-            Center = new Vector3(0, 0, 15);
-            /*vertices = new Vector3[]{ 
-                new Vector3(10, 10, 5), new Vector3(10, -10, 5), new Vector3(-10, -10, 5), new Vector3(-10, 10, 5),
-                new Vector3(10, 10, 25), new Vector3(10, -10, 25), new Vector3(-10, -10, 25), new Vector3(-10, 10, 25)
-            };
-            Center = new Vector3(0, 0, 2);
-            vertices = new Vector3[]{
-                new Vector3(1, 1, 1), new Vector3(1, -1, 1), new Vector3(-1, -1, 1), new Vector3(-1, 1, 1),
-                new Vector3(1, 1, 3), new Vector3(1, -1, 3), new Vector3(-1, -1, 3), new Vector3(-1, 1, 3)
-            };
-            Center = new Vector3(0, 0, 1.5f);
-            vertices = new Vector3[]{
-                new Vector3(0.5f, 0.5f, 1), new Vector3(0.5f, -0.5f, 1f), new Vector3(-0.5f, -0.5f, 1f), new Vector3(-0.5f, 0.5f, 1f),
-                new Vector3(0.5f, 0.5f, 2), new Vector3(0.5f, -0.5f, 2), new Vector3(-0.5f, -0.5f, 2), new Vector3(-0.5f, 0.5f, 2)
-            };*/
 
-            //vertices = new Vector3[]{ new Vector3(0, 0, 5), new Vector3(10, 0, 5), new Vector3(10, 10, 5), new Vector3(0, 10, 5) };
-            indeces = new int[] { 0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4, 7, 3, 2, 2, 6, 7, 0, 4, 5, 5, 1, 0, 7, 4, 0, 0, 3, 7, 2, 1, 5, 5, 6, 2 };
-            //indeces = new int[] { 7, 3, 2 };
-            //indeces = new int[] { 7, 3, 2, 2, 6, 7, 0, 4, 5, 5, 1, 0, 7, 4, 0, 0, 3, 7, 2, 1, 5, 5, 6, 2 };
-            //indeces = new int[] { 7, 4, 0, 0, 3, 7, 2, 1, 5, 5, 6, 2 };
-
-            Center = new Vector3(monke.right - (monke.right - monke.left) / 2, monke.top - (monke.top - monke.bottom) / 2, monke.front - (monke.front - monke.back) / 2);
-            Console.WriteLine($"Center: ({ Center.x }, { Center.y }, { Center.z })");
-            vertices = monke.vertices;
-            //indeces = monke.indeces;
+            Center = new Vector3(model.right - (model.right - model.left) / 2, model.top - (model.top - model.bottom) / 2, model.front - (model.front - model.back) / 2);
+            vertices = model.vertices;
             map = new Bitmap(planeWidth, planeWidth);
             pictureBox1.Image = map;
             lastCheck = DateTime.Now;
@@ -220,147 +187,6 @@ namespace _2021_10_02_Лаба_номер_5
                     x += d.x;
                     z += d.z;
                 }
-            }
-        }
-
-        private unsafe void DrawLine(byte* scan0, int stride, int bitsPerPixel, PointF p1, PointF p2)
-        {
-            int start, end;
-            if (Math.Abs(p1.X - p2.X) > Math.Abs(p1.Y - p2.Y))
-            {
-                start = (int)Math.Floor(p1.X); end = (int)Math.Floor(p2.X);
-                if (start > end)
-                {
-                    int temp = start;
-                    start = end;
-                    end = temp;
-                    PointF tem = p1;
-                    p1 = p2;
-                    p2 = tem;
-                }
-                float d = (p2.Y - p1.Y) / (p2.X - p1.X);
-                float y = p1.Y;
-                end = Math.Min(planeWidth - 1, Math.Max(1, end));
-                start = Math.Max(1, Math.Min(planeWidth - 1, start));
-                for (int x = start; x <= end; x++)
-                {
-                    if (0 <= y && y < planeHeight)
-                    {
-                        byte* data = scan0 + ((int)Math.Floor(y)) * stride + x * bitsPerPixel;
-                        data[0] = 20;
-                        data[1] = 200;
-                        data[2] = 20;
-                        data[3] = 255;
-                    }
-                    y += d;
-                }
-            }
-            else
-            {
-                start = (int)Math.Floor(p1.Y); end = (int)Math.Floor(p2.Y);
-                if (start > end)
-                {
-                    int temp = start;
-                    start = end;
-                    end = temp;
-                    PointF tem = p1;
-                    p1 = p2;
-                    p2 = tem;
-                }
-                float d = (p2.X - p1.X) / (p2.Y - p1.Y);
-                float x = p1.X;
-                end = Math.Min(planeHeight - 1, Math.Max(1, end));
-                start = Math.Max(1, Math.Min(planeHeight - 1, start));
-                for (int y = start; y <= end; y++)
-                {
-                    if (x >= 0 && x < planeWidth)
-                    {
-                        byte* data = scan0 + y * stride + ((int)Math.Floor(x)) * bitsPerPixel;
-                        data[0] = 20;
-                        data[1] = 200;
-                        data[2] = 20;
-                        data[3] = 255;
-                    }
-                    x += d;
-                }
-            }
-        }
-
-        private void DrawLine(PointF p1, PointF p2, Color c)
-        {
-            int start, end;
-            if (Math.Abs(p1.X - p2.X) > Math.Abs(p1.Y - p2.Y))
-            {
-                start = (int)Math.Floor(p1.X); end = (int)Math.Floor(p2.X);
-                if (start > end)
-                {
-                    int temp = start;
-                    start = end;
-                    end = temp;
-                    PointF tem = p1;
-                    p1 = p2;
-                    p2 = tem;
-                }
-                float d = (p2.Y - p1.Y) / (p2.X - p1.X);
-                float y = p1.Y;
-                end = Math.Min(planeWidth - 1, Math.Max(1, end));
-                start = Math.Max(1, Math.Min(planeWidth - 1, start));
-                for (int x = start; x <= end; x++)
-                {
-                    if (0 < y && y < planeHeight)
-                    {
-                        map.SetPixel(x, (int)Math.Floor(y), c);
-                    }
-                    y += d;
-                }
-            } 
-            else
-            {
-                start = (int)Math.Floor(p1.Y); end = (int)Math.Floor(p2.Y);
-                if (start > end)
-                {
-                    int temp = start;
-                    start = end;
-                    end = temp;
-                    PointF tem = p1;
-                    p1 = p2;
-                    p2 = tem;
-                }
-                float d = (p2.X - p1.X) / (p2.Y - p1.Y);
-                float x = p1.X;
-                end = Math.Min(planeHeight - 1, Math.Max(1, end));
-                start = Math.Max(1, Math.Min(planeHeight - 1, start));
-                for (int y = start; y <= end; y++)
-                {
-                    if (x > 0 && x < planeWidth)
-                    {
-                        map.SetPixel((int)Math.Floor(x), y, c);
-                    }
-                    x += d;
-                }
-            }
-        }
-
-        private void SortPoints(ref Vector3 left, ref Vector3 mid, ref Vector3 right)
-        {
-            Vector3 temp;
-            if (left.x > mid.x)
-            {
-                temp = left;
-                left = mid;
-                mid = temp;
-            }
-            if (right.x < mid.x)
-            {
-                temp = right;
-                right = mid;
-                mid = temp;
-            }
-            if (left.x > mid.x)
-            {
-                temp = left;
-                left = mid;
-                mid = temp;
             }
         }
 
@@ -571,15 +397,8 @@ namespace _2021_10_02_Лаба_номер_5
             }
         }
 
-        private void pictureBox1_Paint(object sender, PaintEventArgs e)
-        {
-            //DrawLine(new PointF(0, 0), new PointF(100, 20), Color.Red);
-            //e.Graphics.FillRectangle(new SolidBrush(Color.Cyan), new Rectangle(0, 0, pictureBox1.ClientRectangle.Width, pictureBox1.ClientRectangle.Height));
-        }
-
         private void timer1_Tick(object sender, EventArgs e)
         {
-            //angle_tick += 0.01f;
             RotateBias(angle_tick, true, true, true);
             Cycle();
         }
@@ -593,12 +412,6 @@ namespace _2021_10_02_Лаба_номер_5
             map = new Bitmap(planeWidth, planeHeight);
             Render();
             pictureBox1.Image = map;
-            planeHeight = pictureBox2.Height;
-            planeWidth = pictureBox2.Width;
-            scale = planeWidth / (2 * (float)Math.Tan(ang / 2) * planeZ);
-            map = new Bitmap(planeWidth, planeHeight);
-            Render(false);
-            pictureBox2.Image = map;
             label1.Text = GetFps().ToString() + " fps";
         }
 
@@ -612,15 +425,17 @@ namespace _2021_10_02_Лаба_номер_5
             Bias.x.Rotate(angle, x, y, z);
             Bias.y.Rotate(angle, x, y, z);
             Bias.z.Rotate(angle, x, y, z);
-            /*Console.WriteLine(Bias.x.x.ToString() + " " + Bias.x.y.ToString() + " " + Bias.x.z.ToString());
-            Console.WriteLine(Bias.y.x.ToString() + " " + Bias.y.y.ToString() + " " + Bias.y.z.ToString());
-            Console.WriteLine(Bias.z.x.ToString() + " " + Bias.z.y.ToString() + " " + Bias.z.z.ToString());*/
+        }
+
+        void RotateBias(ref Mat3 bias, float angle, bool x, bool y, bool z)
+        {
+            bias.x.Rotate(angle, x, y, z);
+            bias.y.Rotate(angle, x, y, z);
+            bias.z.Rotate(angle, x, y, z);
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            //map = new Bitmap(planeWidth, planeHeight);
-            //pictureBox1.Image = map;
             Bias = new Vector3[] { new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1) };
             Cycle();
         }
@@ -683,6 +498,52 @@ namespace _2021_10_02_Лаба_номер_5
             {
 
             }
+        }
+
+        const float ANGLE = (float)Math.PI / 6;
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            Mat3 bias = new Vector3[] { new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1) };
+            RotateBias(ref bias, -ANGLE, false, true, false);
+            Bias.x = bias * Bias.x;
+            Bias.y = bias * Bias.y;
+            Bias.z = bias * Bias.z;
+            //RotateBias(-ANGLE, false, true, false);
+            Cycle();
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            Mat3 bias = new Vector3[] { new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1) };
+            RotateBias(ref bias, ANGLE, false, true, false);
+            Bias.x = bias * Bias.x;
+            Bias.y = bias * Bias.y;
+            Bias.z = bias * Bias.z;
+            //RotateBias(ANGLE, false, true, false);
+            Cycle();
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            Mat3 bias = new Vector3[] { new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1) };
+            RotateBias(ref bias, -ANGLE, true, false, false);
+            Bias.x = bias * Bias.x;
+            Bias.y = bias * Bias.y;
+            Bias.z = bias * Bias.z;
+            //RotateBias(-ANGLE, true, false, false);
+            Cycle();
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            Mat3 bias = new Vector3[] { new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1) };
+            RotateBias(ref bias, ANGLE, true, false, false);
+            Bias.x = bias * Bias.x;
+            Bias.y = bias * Bias.y;
+            Bias.z = bias * Bias.z;
+            //RotateBias(ANGLE, true, false, false);
+            Cycle();
         }
     }
 
