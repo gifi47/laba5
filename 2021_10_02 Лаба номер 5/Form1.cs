@@ -107,7 +107,7 @@ namespace _2021_10_02_Лаба_номер_5
         {
             random = new Random((int)DateTime.Now.ToBinary());
             //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\makaka.obj", true);
-            monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\freddy.obj", true);
+            monke = new Model(@"C:\Visual Studio Projects 2019-2022\Мтуси программирование\2021_10_02 Лаба номер 5\freddy.obj", true);
             //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\physic_final_ver.obj", true);
             //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\pistol.obj", true);
             planeZ = 1;
