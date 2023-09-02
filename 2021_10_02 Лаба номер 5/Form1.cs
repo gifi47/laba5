@@ -13,6 +13,8 @@ namespace _2021_10_02_Лаба_номер_5
 {
     public partial class Form1 : Form
     {
+        public static string filePath = @"C:\Visual Studio Projects 2019-2022\Мтуси программирование\2021_10_02 Лаба номер 5\";
+
         public Form1()
         {
             InitializeComponent();
@@ -84,8 +86,9 @@ namespace _2021_10_02_Лаба_номер_5
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            texture = new Bitmap(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\Cube_t_uv_2.png");
-            model = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\cube_t_uv.obj", true);
+            //texture = new Bitmap(filePath + @"Cube_t_uv_2.png");
+            texture = new Bitmap(filePath + @"msm_texture_2.bmp");
+            model = new Model(filePath + @"cube_t_uv.obj", true);
             planeZ = 1;
             Translation = new Vector3(0, 0, 3);
             angle_tick = 0.01f;
