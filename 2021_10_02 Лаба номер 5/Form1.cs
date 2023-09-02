@@ -13,6 +13,8 @@ namespace _2021_10_02_Лаба_номер_5
 {
     public partial class Form1 : Form
     {
+        static string filePath = @"C:\Visual Studio Projects 2019-2022\Мтуси программирование\2021_10_02 Лаба номер 5\";
+
         public Form1()
         {
             InitializeComponent();
@@ -86,12 +88,12 @@ namespace _2021_10_02_Лаба_номер_5
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            texture = new Bitmap(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\ahri.png");
-            //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\makaka.obj", true);
-            monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\ahri.obj", true);
-            //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\cube_t.obj", true);
-            //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\physic_final_ver.obj", true);
-            //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\pistol.obj", true);
+            texture = new Bitmap(filePath + "ahri.png");
+            //monke = new Model(filePath + @"2021_10_02 Лаба номер 5\makaka.obj", true);
+            monke = new Model(filePath + "ahri.obj", true);
+            //monke = new Model(filePath + @"cube_t.obj", true);
+            //monke = new Model(filePath + @"2021_10_02 Лаба номер 5\physic_final_ver.obj", true);
+            //monke = new Model(filePath + @"2021_10_02 Лаба номер 5\pistol.obj", true);
             planeZ = 1;
             //Translation = new Vector3(0, 0, 0);
             Translation = new Vector3(0, -2, 4);
