@@ -13,6 +13,8 @@ namespace _2021_10_02_Лаба_номер_5
 {
     public partial class Form1 : Form
     {
+        public static string filePath = @"C:\Visual Studio Projects 2019-2022\Мтуси программирование\2021_10_02 Лаба номер 5\";
+
         public Form1()
         {
             InitializeComponent();
@@ -100,10 +102,10 @@ namespace _2021_10_02_Лаба_номер_5
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\makaka.obj", true);
-            //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\monke.obj", true);
-            //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\physic_final_ver.obj", true);
-            //monke = new Model(@"D:\Visual Studio Projects\Мтуси программирование\2021_10_02 Лаба номер 5\2021_10_02 Лаба номер 5\pistol.obj", true);
+            monke = new Model(filePath + @"2021_10_02 Лаба номер 5\makaka.obj", true);
+            //monke = new Model(filePath + @"monke.obj", true);
+            //monke = new Model(filePath + @"2021_10_02 Лаба номер 5\physic_final_ver.obj", true);
+            //monke = new Model(filePath + @"2021_10_02 Лаба номер 5\pistol.obj", true);
             planeZ = 1;
             //Translation = new Vector3(0, -0.5f, 4);
             Translation = new Vector3(0, 0, 2);
